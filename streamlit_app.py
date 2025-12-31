@@ -6,10 +6,10 @@ import os
 
 st.set_page_config(page_title="Classroom Pro", page_icon="🏫", layout="wide")
 
+# Safe load data
 def load_data(file):
     path = f"data/{file}"
     if not os.path.exists(path) or os.path.getsize(path) == 0:
-        # Return empty DataFrame with correct columns
         columns = {
             "students.csv": ["id", "name", "email", "phone", "age", "gender", "class"],
             "teachers.csv": ["id", "name", "subject", "email"],
@@ -19,11 +19,13 @@ def load_data(file):
             "sessions.csv": ["id", "session_name", "start_date", "end_date", "current"],
             "quiz_questions.csv": ["question", "opt1", "opt2", "opt3", "opt4", "correct"],
             "attendance.csv": ["student_id", "date", "present"],
-            "report_card.csv": ["student_id", "score", "total", "percentage", "date"]
+            "quiz_results.csv": ["student_id", "score", "total", "percentage", "date"]
         }
         return pd.DataFrame(columns=columns.get(file, []))
     else:
         return pd.read_csv(path)
+
+# Load all data
 students = load_data("students.csv")
 teachers = load_data("teachers.csv")
 classes = load_data("classes.csv")
@@ -32,17 +34,17 @@ exams = load_data("exams.csv")
 sessions = load_data("sessions.csv")
 quiz_questions = load_data("quiz_questions.csv")
 attendance = load_data("attendance.csv")
-report_cad=load_data("report_card.csv")
+
 # Title
 st.title("🏫 Classroom Pro")
 
-# Login Section
+# Login
 role = st.radio("Login as", ("Admin", "Student"))
 
 if role == "Admin":
     password = st.text_input("Admin Password", type="password")
     if st.button("Login as Admin"):
-        if password == "admin123":  # Change this in production!
+        if password == "admin123":  # Change this!
             st.session_state.logged_in = True
             st.session_state.role = "admin"
             st.success("Admin logged in successfully!")
@@ -63,69 +65,64 @@ elif role == "Student":
         else:
             st.error("Invalid Student ID")
 
-# Logout Button
+# Logout
 if st.session_state.get("logged_in"):
     if st.sidebar.button("Logout"):
         st.session_state.clear()
         st.rerun()
 
-# Admin Interface
+# Admin Navigation
 if st.session_state.get("role") == "admin":
     st.sidebar.title("Admin Navigation")
     choice = st.sidebar.radio("Navigate", [
-    "Dashboard", 
-    "Manage Students", 
-    "Manage Teachers", 
-    "Classes", 
-    "Sections", 
-    "Schedule Exam", 
-    "Session Management", 
-    "Create Quiz", 
-    "Attendance", 
-    "Fees",
-    "Report Cards"   # ← NEW
-])
+        "Dashboard",
+        "Manage Students",
+        "Manage Teachers",
+        "Classes",
+        "Sections",
+        "Schedule Exam",
+        "Session Management",
+        "Create Quiz",
+        "Attendance",
+        "Fees",
+        "Report Cards"
+    ])
 
-    # Page Routing
     if choice == "Dashboard":
         st.header("📊 Admin Dashboard")
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Students", len(students))
         col2.metric("Total Teachers", len(teachers))
         col3.metric("Total Classes", len(classes))
-        col4.metric("Total Exams Scheduled", len(exams))
+        col4.metric("Total Exams", len(exams))
 
         if not students.empty:
-            fig_gender = px.pie(students, names="gender", title="Student Gender Distribution")
-            st.plotly_chart(fig_gender, use_container_width=True)
-
-        if not attendance.empty:
-            fig_att = px.line(attendance, x="date", y="present", color="student_id", title="Attendance Trend")
-            st.plotly_chart(fig_att, use_container_width=True)
+            fig = px.pie(students, names="gender", title="Gender Distribution")
+            st.plotly_chart(fig, use_container_width=True)
 
     elif choice == "Manage Students":
-        st.switch_page("pages/3_Manage_Students.py")
+        st.switch_page("pages/manage_students.py")
     elif choice == "Manage Teachers":
-        st.switch_page("pages/4_Manage_Teachers.py")
+        st.switch_page("pages/manage_teachers.py")
     elif choice == "Classes":
-        st.switch_page("pages/5_Classes.py")
+        st.switch_page("pages/classes.py")
     elif choice == "Sections":
-        st.switch_page("pages/6_Sections.py")
+        st.switch_page("pages/sections.py")
     elif choice == "Schedule Exam":
-        st.switch_page("pages/7_Schedule_Exam.py")
+        st.switch_page("pages/schedule_exam.py")
     elif choice == "Session Management":
-        st.switch_page("pages/8_Session.py")
+        st.switch_page("pages/sessions.py")
     elif choice == "Create Quiz":
-        st.switch_page("pages/9_Create_Quiz.py")
+        st.switch_page("pages/create_quiz.py")
     elif choice == "Attendance":
-        st.switch_page("pages/10_Attendance.py")
+        st.switch_page("pages/attendance.py")
     elif choice == "Fees":
-        st.switch_page("pages/11_Fees.py")
+        st.switch_page("pages/fee_management.py")
     elif choice == "Report Cards":
-        st.switch_page("pages/9_Report_Cards.py")
+        st.switch_page("pages/report_cards.py")
 
-# Student Portal Redirect
+# Student Portal
 if st.session_state.get("role") == "student":
-    st.switch_page("pages/1_Student_Portal.py")
+    st.switch_page("pages/student_portal.py")
 
-st.caption("Classroom Pro • Professional School Management System • 2025")
+st.caption("Classroom Pro • Professional School Management • 2025")

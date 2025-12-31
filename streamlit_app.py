@@ -4,12 +4,12 @@ import plotly.express as px
 from datetime import datetime
 import os
 
-st.set_page_config(page_title="Classroom Pro", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="Classroom Management", page_icon="🏫", layout="wide")
 
+# Safe load data
 def load_data(file):
     path = f"data/{file}"
     if not os.path.exists(path) or os.path.getsize(path) == 0:
-        # Return empty DataFrame with correct columns
         columns = {
             "students.csv": ["id", "name", "email", "phone", "age", "gender", "class"],
             "teachers.csv": ["id", "name", "subject", "email"],
@@ -19,11 +19,13 @@ def load_data(file):
             "sessions.csv": ["id", "session_name", "start_date", "end_date", "current"],
             "quiz_questions.csv": ["question", "opt1", "opt2", "opt3", "opt4", "correct"],
             "attendance.csv": ["student_id", "date", "present"],
-            "report_card.csv": ["student_id", "score", "total", "percentage", "date"]
+            "report_card.csv": ["student_id", "score", "total", "percentage", "date"]  # if you have this
         }
         return pd.DataFrame(columns=columns.get(file, []))
     else:
         return pd.read_csv(path)
+
+# Load data
 students = load_data("students.csv")
 teachers = load_data("teachers.csv")
 classes = load_data("classes.csv")
@@ -32,7 +34,7 @@ exams = load_data("exams.csv")
 sessions = load_data("sessions.csv")
 quiz_questions = load_data("quiz_questions.csv")
 attendance = load_data("attendance.csv")
-report_cad=load_data("report_card.csv")
+
 # Title
 st.title("🏫 Classroom Pro")
 
@@ -42,7 +44,7 @@ role = st.radio("Login as", ("Admin", "Student"))
 if role == "Admin":
     password = st.text_input("Admin Password", type="password")
     if st.button("Login as Admin"):
-        if password == "admin123":  # Change this!
+        if password == "admin123":  # Change this password!
             st.session_state.logged_in = True
             st.session_state.role = "admin"
             st.success("Admin logged in successfully!")
